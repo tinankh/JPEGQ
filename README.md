@@ -4,6 +4,7 @@ JPEGQ
 JPEG QUANTIZATION TABLE ESTIMATION WITH CONTROLLED FALSE DETECITIONS
 
 by Rafael Grompone von Gioi <grompone@gmail.com>
+
 and Tina Nikoukhah <tina.nikoukhah@gmail.com>
 
 
@@ -143,6 +144,7 @@ Copyright and License
 ---------------------
 
 Copyright (c) 2020 Rafael Grompone von Gioi grompone@gmail.com
+
 Copyright (c) 2020 Tina Nikoukhah tina.nikoukhah@gmail.com
 
 JPEGQ is free software: you can redistribute it and/or modify it under
