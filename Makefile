@@ -1,6 +1,6 @@
 EXEC=./jpegq
 SRCDIR=src
-CFLAGS=-std=gnu99 -O3
+CFLAGS=-O3
 LIB=-lpng -ltiff -ljpeg -lm
 SRC_FILES=$(wildcard $(SRCDIR)/*.c)
 
@@ -21,5 +21,6 @@ test: $(EXEC)
 
 clean:
 	$(RM) -rf $(EXEC)
+	$(RM) -f luminance.png
 
 .PHONY: clean
