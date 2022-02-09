@@ -1,7 +1,7 @@
 /*----------------------------------------------------------------------------
 
-  Copyright (c) 2020-2021 Rafael Grompone von Gioi <grompone@gmail.com>
-  Copyright (c) 2020-2021 Tina Nikoukhah <tinanikoukhah@gmail.com>
+  Copyright (c) 2020-2022 Rafael Grompone von Gioi <grompone@gmail.com>
+  Copyright (c) 2020-2022 Tina Nikoukhah <tinanikoukhah@gmail.com>
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as
@@ -24,13 +24,17 @@
 #include <float.h>
 #include <string.h>
 
-#include "iio.h"
+/*----------------------------------------------------------------------------*/
+/* PI */
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif /* !M_PI */
 
 /*----------------------------------------------------------------------------*/
 /* fatal error, print a message to standard-error output and exit.
  */
 void error(char * msg) {
-    fprintf(stderr,"error: %s\n",msg);
+    fprintf(stderr, "error: %s\n", msg);
     exit(EXIT_FAILURE);
 }
 
@@ -48,7 +52,7 @@ void * xcalloc(size_t n_items, size_t size) {
 }
 
 /*----------------------------------------------------------------------------*/
-/* convert rgb image to luminance.
+/* convert RGB image to luminance.
  */
 void rgb2luminance(double * input, double * output, int X, int Y, int C) {
     if (C >= 3) {
@@ -63,31 +67,29 @@ void rgb2luminance(double * input, double * output, int X, int Y, int C) {
 }
 
 /*----------------------------------------------------------------------------*/
-/* compute dct coefficients
+/* compute DCT coefficients
  */
-
 double * compute_dct_coefficients(double * image, int X, int Y, int * N) {
     double * c;
     int n = 0;
-    int x,y;
 
     /* get memory */
     c = (double *) xcalloc(64 * X * Y, sizeof(double));
 
-    for (x=0; x<X-7; x+=8) {
-        for (y=0; y<Y-7; y+=8) {
-            int xx, yy, i, j;
-
-            for (i=0; i<8; i++) {
-                for (j=0; j<8; j++) {
+    for (int x=0; x<X-7; x+=8) {
+        for (int y=0; y<Y-7; y+=8) {
+            for (int i=0; i<8; i++) {
+                for (int j=0; j<8; j++) {
                     double dct_ij = 0.0;
 
-                    for (xx=0; xx<8; xx++)
-                        for (yy=0; yy<8; yy++)
+                    for (int xx=0; xx<8; xx++)
+                        for (int yy=0; yy<8; yy++)
                             dct_ij += image[x+xx + (y+yy) * X]
                                 * cos((2.0*xx+1.0) * i * M_PI / 16.0)
                                 * cos((2.0*yy+1.0) * j * M_PI / 16.0);
-                    dct_ij *= 0.25 * (i==0 ? 1.0/sqrt(2.0) : 1.0)
+
+                    dct_ij *= 0.25
+                        * (i==0 ? 1.0/sqrt(2.0) : 1.0)
                         * (j==0 ? 1.0/sqrt(2.0) : 1.0);
 
                     c[64*n + i + j*8] = dct_ij;
@@ -103,28 +105,20 @@ double * compute_dct_coefficients(double * image, int X, int Y, int * N) {
 }
 
 /*----------------------------------------------------------------------------*/
-/**
- * @brief       Computes the logarithm of NFA to base 10
- * @param       coeff DCT coefficient
- * @param       N number of bins
- * @param       c coefficient position amogng the 64 possibilities
- * @param       Q possible value from 1 to 255
- * @return      log10(NFA)
+/* computes quantization NFA (in log10) for coefficient c
+   and quantization value q
  */
-
 double quantization_nfa(double * coeff, int N, int c, double Q) {
+    double logNT = log10(64.0 * 63.0 * 255.0);
     double logNFA;
-    double logNT = log10(64.0 * 255.0);
     double s = 0.0;
     int n = 0;
-    int i;
 
     /* compute the sum of quantization errors */
-    for (i=0; i<N; i++) {
+    for (int i=0; i<N; i++) {
         double v = fabs(coeff[64*i + c]);
         double q = round(v / Q);
-        /* normalized error to [0,1] */
-        double e = 2.0 * fabs(v/Q - q);
+        double e = 2.0 * fabs(v/Q - q); /* normalized error to [0,1] */
 
         if (fabs(q) >= 1.0) {
             n ++;
@@ -143,62 +137,46 @@ double quantization_nfa(double * coeff, int N, int c, double Q) {
 }
 
 /*----------------------------------------------------------------------------*/
-/* Main code */
+/* JPEG Q-table estimation
+   Input:
+     image    pointer to input data
+     X        number of columns
+     Y        number of rows
+     C        number of channesl
+   Output:
+     Q        Q-table (-1 for non-detected elements)
+     logNFA   associated logNFA table
+ */
+void jpegq(double * image, int X, int Y, int C, double * Q, double * logNFA) {
 
-int jpegq(double * input, double * image, double * Q, double * logNFA, int X, int Y, int C) {
-
-    /* computed values */
-    double *coeff;
-    int N;
-    double lnfa;
-    int c;
-    double q;
-    /* double Q[64]; */
-    /* double logNFA[64]; */
-    int i,j;
-
-    /* work on Y channel */
-    rgb2luminance(input, image, X, Y, C);
+    /* compute luminance channel */
+    double * luminance = (double *) xcalloc(X*Y, sizeof(double));
+    rgb2luminance(image, luminance, X, Y, C);
 
     /* compute all DCT coefficients for all image blocks*/
-    coeff = compute_dct_coefficients(image, X, Y, &N);
+    int N;
+    double * coeff = compute_dct_coefficients(luminance, X, Y, &N);
 
     /* estimate quantization matrix */
-    /* loop on coefficients */
-    for (c=0; c<64; c++) {
+    for (int c=1; c<64; c++) { /* loop on coefficients */
         Q[c] = -1.0;
         logNFA[c] = DBL_MAX;
 
-        /* loop on quantization values */
-        for (q=1.0; q<=255.0; q+=1.0) {
-            lnfa = quantization_nfa(coeff,N,c,q);
+        for (double q=1.0; q<=255.0; q+=1.0) { /* loop on quantization values */
+            double lnfa = quantization_nfa(coeff, N, c, q);
 
             /* keep the best q value */
             if (lnfa < logNFA[c]) {
                 logNFA[c] = lnfa;
-                Q[c] = q;
+
+                if (lnfa < 0.0)
+                    Q[c] = q;
             }
         }
     }
 
-    /* print estimated quantization matrix */
-    printf("estimated quantization matrix (-1 when not meaningful):\n");
-    for (j=0; j<8; j++) {
-        for (i=0; i<8; i++)
-            printf("%3g ", logNFA[i+j*8] < 0.0 ? Q[i+j*8] : -1 );
-        printf("\n");
-    }
-
-    /* print the associated NFA values */
-    printf("\nassociated log10(NFA) values:\n");
-    for (j=0; j<8; j++) {
-        for(i=0; i<8; i++)
-            printf("%9.1f ", logNFA[i+j*8]);
-        printf("\n");
-    }
-
     /* free memory */
     free(coeff);
-
-    return EXIT_SUCCESS;
+    free(luminance);
 }
+/*----------------------------------------------------------------------------*/

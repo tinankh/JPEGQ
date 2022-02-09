@@ -1,7 +1,7 @@
 /*----------------------------------------------------------------------------
 
-  Copyright (c) 2020-2021 Rafael Grompone von Gioi <grompone@gmail.com>
-  Copyright (c) 2020-2021 Tina Nikoukhah <tinanikoukhah@gmail.com>
+  Copyright (c) 2020-2022 Rafael Grompone von Gioi <grompone@gmail.com>
+  Copyright (c) 2020-2022 Tina Nikoukhah <tinanikoukhah@gmail.com>
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as
@@ -31,6 +31,7 @@ double * compute_dct_coefficients(double * image, int X, int Y, int * N);
 
 double quantization_nfa(double * coeff, int N, int c, double Q);
 
-int jpegq(double * input, double * image, double * Q, double * logNFA, int X, int Y, int C);
+void jpegq(double * image, int X, int Y, int C, double * Q, double * logNFA);
 
 #endif
+/*----------------------------------------------------------------------------*/

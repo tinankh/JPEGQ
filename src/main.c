@@ -1,8 +1,7 @@
 /*----------------------------------------------------------------------------
 
-  Copyright (c) 2018-2021 Rafael Grompone von Gioi <grompone@gmail.com>
-  Copyright (c) 2018-2021 Jérémy Anger <anger@cmla.ens-cachan.fr>
-  Copyright (c) 2018-2021 Tina Nikoukhah <tinanikoukhah@gmail.com>
+  Copyright (c) 2020-2022 Rafael Grompone von Gioi <grompone@gmail.com>
+  Copyright (c) 2020-2022 Tina Nikoukhah <tinanikoukhah@gmail.com>
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as
@@ -28,29 +27,46 @@
 #include "jpegq.h"
 
 int main(int argc, char ** argv) {
-    double * input;
     double * image;
     double Q[64];
     double logNFA[64];
     int X, Y, C;
 
-    if (argc != 2) error("use: jpegq <image>");
+    if (argc != 2) error("usage: jpegq <image>");
 
-    input = iio_read_image_double_split(argv[1], &X, &Y, &C);
-
-    /* luminance image */
-    image = (double *) xcalloc(X*Y, sizeof(double));
+    image = iio_read_image_double_split(argv[1], &X, &Y, &C);
 
     /* run algorithm */
-    jpegq(input, image, Q, logNFA, X, Y, C);
+    jpegq(image, X, Y, C, Q, logNFA);
 
-    /* store vote map and forgery detection outputs */
-    iio_write_image_double("luminance.png", image, X, Y);
+    /* print estimated quantization matrix */
+    printf("estimated quantization matrix (- when not meaningful):\n");
+    for (int j=0; j<8; j++) {
+        for (int i=0; i<8; i++)
+            if (i == 0 && j == 0) /* DC coefficient, not estimated */
+                printf("    ");
+            else
+                if (logNFA[i+j*8] < 0.0)
+                    printf("%3g ", Q[i+j*8] );
+                else
+                    printf("  - ");
+        printf("\n");
+    }
+
+    /* print the associated NFA values */
+    printf("\nassociated log10(NFA) values:\n");
+    for (int j=0; j<8; j++) {
+        for(int i=0; i<8; i++)
+            if (i == 0 && j == 0) /* DC coefficient, not estimated */
+                printf("          ");
+            else
+                printf("%9.1f ", logNFA[i+j*8]);
+        printf("\n");
+    }
 
     /* free memory */
-    free((void *) input);
-    free((void *) image);
+    free(image);
 
     return EXIT_SUCCESS;
 }
-/* ---------------------------------------------------------------------------- */
+/*----------------------------------------------------------------------------*/

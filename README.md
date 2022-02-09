@@ -143,9 +143,9 @@ A typical execution is as follows:
 Copyright and License
 ---------------------
 
-Copyright (c) 2020 Rafael Grompone von Gioi grompone@gmail.com
+Copyright (c) 2020-2022 Rafael Grompone von Gioi grompone@gmail.com
 
-Copyright (c) 2020 Tina Nikoukhah tina.nikoukhah@gmail.com
+Copyright (c) 2020-2022 Tina Nikoukhah tina.nikoukhah@gmail.com
 
 JPEGQ is free software: you can redistribute it and/or modify it under
 the terms of the GNU Affero General Public License as published by the

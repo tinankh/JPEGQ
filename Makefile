@@ -21,6 +21,5 @@ test: $(EXEC)
 
 clean:
 	$(RM) -rf $(EXEC)
-	$(RM) -f luminance.png
 
 .PHONY: clean
