@@ -28,7 +28,7 @@
 
 int main(int argc, char ** argv) {
     double * image;
-    double Q[64];
+    double Qtable[64];
     double logNFA[64];
     int X, Y, C;
 
@@ -37,17 +37,17 @@ int main(int argc, char ** argv) {
     image = iio_read_image_double_split(argv[1], &X, &Y, &C);
 
     /* run algorithm */
-    jpegq(image, X, Y, C, Q, logNFA);
+    jpegq(image, X, Y, C, Qtable, logNFA);
 
     /* print estimated quantization matrix */
     printf("estimated quantization matrix (- when not meaningful):\n");
     for (int j=0; j<8; j++) {
         for (int i=0; i<8; i++)
             if (i == 0 && j == 0) /* DC coefficient, not estimated */
-                printf("    ");
+                printf("  - ");
             else
                 if (logNFA[i+j*8] < 0.0)
-                    printf("%3g ", Q[i+j*8] );
+                    printf("%3g ", Qtable[i+j*8] );
                 else
                     printf("  - ");
         printf("\n");
@@ -58,7 +58,7 @@ int main(int argc, char ** argv) {
     for (int j=0; j<8; j++) {
         for(int i=0; i<8; i++)
             if (i == 0 && j == 0) /* DC coefficient, not estimated */
-                printf("          ");
+                printf("      -   ");
             else
                 printf("%9.1f ", logNFA[i+j*8]);
         printf("\n");
