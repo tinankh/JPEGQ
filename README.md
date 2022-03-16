@@ -1,5 +1,5 @@
-JPEGQ
-=====
+JPEG_QT
+=======
 
 JPEG QUANTIZATION TABLE ESTIMATION WITH CONTROLLED FALSE DETECTIONS
 
@@ -33,13 +33,9 @@ The following libraries are required for image input/output:
 Files
 -----
 
-- src/jpegq.c: Main code.
+- src/jpeg_qt.c and src/jpeg_qt.h: JPEG Q-table estimation algorithm.
 
-- src/acontrario.c and src/acontrario.h: A contrario computation.
-
-- src/dctblocks.c and src/dctblocks.h: DCT computation.
-
-- src/misc.c and src/misc.h: Useful functions.
+- src/main.c: Main code: command line interface.
 
 - README.md: this file.
 
@@ -59,10 +55,10 @@ The compiling instruction is
 ```bash
   make
 ```
-from the directory where the source codes and the Makefile are located.
+from the directory where the Makefile is located.
 
-To verify a correct compilation you can apply the algorithm to the test images
-'pelican.png' and 'roma.png'. This can be done by executing:
+To verify a correct compilation you can apply the algorithm on the test images
+'roma.png' and 'roma95.jpg'. This can be done by executing:
 ```bash
   make test
 ```
@@ -70,10 +66,10 @@ To verify a correct compilation you can apply the algorithm to the test images
 This should print the following message:
 ```bash
 test on roma.png
-===================
-./jpegq roma.png
+================
+./jpeg_qt roma.png
 estimated quantization matrix (- when not meaningful):
-  -   -   -   -   -   -   -   -
+      -   -   -   -   -   -   -
   -   -   -   -   -   -   -   -
   -   -   -   -   -   -   -   -
   -   -   -   -   -   -   -   -
@@ -83,7 +79,7 @@ estimated quantization matrix (- when not meaningful):
   -   -   -   -   -   -   -   -
 
 associated log10(NFA) values:
-      -        40.5      14.5       9.7       6.1       5.1       5.5       5.4
+               40.5      14.5       9.7       6.1       5.1       5.5       5.4
      89.7      18.5       9.0       7.6       6.5       5.9       6.0       5.9
      36.1      10.1       6.0       6.1       5.8       6.0       5.8       6.0
      24.6       6.3       5.7       5.9       5.7       6.0       5.8       6.0
@@ -93,10 +89,10 @@ associated log10(NFA) values:
       5.9       5.7       5.9       5.4       6.0       5.5       6.0       6.0
 
 test on roma95.jpg
-================
-./jpegq roma95.jpg
+==================
+./jpeg_qt roma95.jpg
 estimated quantization matrix (- when not meaningful):
-  -   -   -   2   2   4   5   6
+      -   -   2   2   4   5   6
   -   -   -   2   3   6   6   6
   -   -   2   2   4   6   7   6
   -   2   2   3   5   9   8   6
@@ -106,7 +102,7 @@ estimated quantization matrix (- when not meaningful):
   7   9  10  10  11  10  10  10
 
 associated log10(NFA) values:
-      -        41.0      14.7    -636.0    -604.6    -845.0    -592.9    -400.0
+               41.0      14.7    -636.0    -604.6    -845.0    -592.9    -400.0
      90.7      18.5       9.0    -560.8    -793.6    -627.5    -453.6    -301.6
      36.2      10.9    -600.5    -536.3    -756.2    -537.6    -320.4    -270.3
      24.3    -647.4    -574.6    -755.5    -623.2    -305.3    -212.7    -192.0
@@ -121,14 +117,14 @@ Running
 
 The program is executed as:
 ```bash
-    jpegq
+    jpeg_qt
 ```
 
-(use ./god if the command is not included in the current path).
+(use ./jpeg_qt if the command is not included in the current path).
 That should print the following usage:
 
 ```
-  Error: use: jpegq <image>
+  error: usage: jpeg_qt <image>
 ```
 
 The command takes an input image as argument. Any image file format handled by
@@ -137,7 +133,7 @@ PNG, JPG, TIFF, PPM, PGM.
 
 A typical execution is as follows:
 ```
-  ./jpegq pelican.png
+  ./jpeg_qt roma.png
 ```
 
 Copyright and License

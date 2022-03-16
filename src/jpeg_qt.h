@@ -18,8 +18,8 @@
 
   ----------------------------------------------------------------------------*/
 
-#ifndef JPEGQ_H
-#define JPEGQ_H
+#ifndef JPEG_QT_H
+#define JPEG_QT_H
 
 void error(char * msg);
 
@@ -31,7 +31,7 @@ double * compute_dct_coefficients(double * image, int X, int Y, int * N);
 
 double quantization_nfa(double * coeff, int N, int c, double Q);
 
-void jpegq(double * image, int X, int Y, int C, double * Q, double * logNFA);
+void jpeg_qt(double * image, int X, int Y, int C, double * Q, double * logNFA);
 
 #endif
 /*----------------------------------------------------------------------------*/

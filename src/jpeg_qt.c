@@ -74,7 +74,7 @@ double * compute_dct_coefficients(double * image, int X, int Y, int * N) {
     int n = 0;
 
     /* get memory */
-    c = (double *) xcalloc(64 * X * Y, sizeof(double));
+    c = (double *) xcalloc(X * Y, sizeof(double));
 
     for (int x=0; x<X-7; x+=8) {
         for (int y=0; y<Y-7; y+=8) {
@@ -108,7 +108,7 @@ double * compute_dct_coefficients(double * image, int X, int Y, int * N) {
 /* computes quantization NFA (in log10) for coefficient c
    and quantization value q
  */
-double quantization_nfa(double * coeff, int N, int c, double Q) {
+double quantization_nfa(double * coeff, int N, int c, double q) {
     double logNT = log10(64.0 * 63.0 * 255.0);
     double logNFA;
     double s = 0.0;
@@ -117,10 +117,10 @@ double quantization_nfa(double * coeff, int N, int c, double Q) {
     /* compute the sum of quantization errors */
     for (int i=0; i<N; i++) {
         double v = fabs(coeff[64*i + c]);
-        double q = round(v / Q);
-        double e = 2.0 * fabs(v/Q - q); /* normalized error to [0,1] */
+        double V = round(v / q);         /* nearest quantized value */
+        double e = 2.0 * fabs(v/q - V);  /* normalized error to [0,1] */
 
-        if (fabs(q) >= 1.0) {
+        if (fabs(V) >= 1.0) {
             n ++;
             s += e;
         }
@@ -147,7 +147,7 @@ double quantization_nfa(double * coeff, int N, int c, double Q) {
      Q        Q-table (-1 for non-detected elements)
      logNFA   associated logNFA table
  */
-void jpegq(double * image, int X, int Y, int C, double * Q, double * logNFA) {
+void jpeg_qt(double * image, int X, int Y, int C, double * Q, double * logNFA) {
 
     /* compute luminance channel */
     double * luminance = (double *) xcalloc(X*Y, sizeof(double));
@@ -158,9 +158,9 @@ void jpegq(double * image, int X, int Y, int C, double * Q, double * logNFA) {
     double * coeff = compute_dct_coefficients(luminance, X, Y, &N);
 
     /* estimate quantization matrix */
-    for (int c=1; c<64; c++) { /* loop on coefficients */
-        Q[c] = -1.0;
-        logNFA[c] = DBL_MAX;
+    for (int c=1; c<64; c++) {  /* loop on coefficients (DC coeff excluded) */
+        Q[c] = -1.0;            /* initialize Q-table as non-detected */
+        logNFA[c] = DBL_MAX;    /* initialize NFA as not meaningful */
 
         for (double q=1.0; q<=255.0; q+=1.0) { /* loop on quantization values */
             double lnfa = quantization_nfa(coeff, N, c, q);

@@ -1,4 +1,4 @@
-EXEC=./jpegq
+EXEC=./jpeg_qt
 SRCDIR=src
 CFLAGS=-O3
 LIB=-lpng -ltiff -ljpeg -lm
@@ -12,11 +12,11 @@ $(EXEC): $(SRC_FILES)
 test: $(EXEC)
 	@echo
 	@echo test on roma.png
-	@echo ===================
+	@echo ================
 	$(EXEC) roma.png
 	@echo
 	@echo test on roma95.jpg
-	@echo ================
+	@echo ==================
 	$(EXEC) roma95.jpg
 
 clean:

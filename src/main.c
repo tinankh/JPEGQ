@@ -24,7 +24,7 @@
 #include <string.h>
 
 #include "iio.h"
-#include "jpegq.h"
+#include "jpeg_qt.h"
 
 int main(int argc, char ** argv) {
     double * image;
@@ -32,19 +32,19 @@ int main(int argc, char ** argv) {
     double logNFA[64];
     int X, Y, C;
 
-    if (argc != 2) error("usage: jpegq <image>");
+    if (argc != 2) error("usage: jpeg_qt <image>");
 
     image = iio_read_image_double_split(argv[1], &X, &Y, &C);
 
     /* run algorithm */
-    jpegq(image, X, Y, C, Qtable, logNFA);
+    jpeg_qt(image, X, Y, C, Qtable, logNFA);
 
     /* print estimated quantization matrix */
     printf("estimated quantization matrix (- when not meaningful):\n");
     for (int j=0; j<8; j++) {
         for (int i=0; i<8; i++)
             if (i == 0 && j == 0) /* DC coefficient, not estimated */
-                printf("  - ");
+                printf("    ");
             else
                 if (logNFA[i+j*8] < 0.0)
                     printf("%3g ", Qtable[i+j*8] );
@@ -58,7 +58,7 @@ int main(int argc, char ** argv) {
     for (int j=0; j<8; j++) {
         for(int i=0; i<8; i++)
             if (i == 0 && j == 0) /* DC coefficient, not estimated */
-                printf("      -   ");
+                printf("          ");
             else
                 printf("%9.1f ", logNFA[i+j*8]);
         printf("\n");
