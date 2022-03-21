@@ -20,9 +20,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <string.h>
-
 #include "iio.h"
 #include "jpeg_qt.h"
 
@@ -56,7 +53,7 @@ int main(int argc, char ** argv) {
     /* print the associated NFA values */
     printf("\nassociated log10(NFA) values:\n");
     for (int j=0; j<8; j++) {
-        for(int i=0; i<8; i++)
+        for (int i=0; i<8; i++)
             if (i == 0 && j == 0) /* DC coefficient, not estimated */
                 printf("          ");
             else

@@ -111,18 +111,18 @@ double * compute_dct_coefficients(double * image, int X, int Y, int * N) {
 double quantization_nfa(double * coeff, int N, int c, double q) {
     double logNT = log10(64.0 * 63.0 * 255.0);
     double logNFA;
-    double s = 0.0;
-    int n = 0;
+    double s = 0.0;  /* sum of normalized quantization errors */
+    int n = 0;       /* number of considered values */
 
     /* compute the sum of quantization errors */
-    for (int i=0; i<N; i++) {
-        double v = fabs(coeff[64*i + c]);
-        double V = round(v / q);         /* nearest quantized value */
-        double e = 2.0 * fabs(v/q - V);  /* normalized error to [0,1] */
+    for (int i=0; i<N; i++) {     /* loop over all JPEG blocks of the image */
+        double v = coeff[64*i + c];  /* DCT coefficient number c of block i */
+        double V = round(v / q);     /* nearest quantized value */
 
-        if (fabs(V) >= 1.0) {
-            n ++;
-            s += e;
+        if (V != 0.0) {   /* avoid central peak */
+            double e = 2.0 * fabs(v/q - V);  /* normalized error to [0,1] */
+            s += e;       /* update sum of normalized quantization errors */
+            n++;          /* update number of considered values */
         }
     }
 
