@@ -17,7 +17,7 @@ This program implements an a-contrario estimator of the JPEG quantization table.
 Online Demo
 ------------
 
-[IPOL](https://ipolcore.ipol.im/demo/clientApp/demo.html?id=77777000052)
+[IPOL](https://ipolcore.ipol.im/demo/clientApp/demo.html?id=399)
 
 
 Requirements
