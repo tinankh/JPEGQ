@@ -31,6 +31,9 @@
 #endif /* !M_PI */
 
 /*----------------------------------------------------------------------------*/
+#define MIN(a,b) ( (a)<(b) ? (a) : (b) )
+
+/*----------------------------------------------------------------------------*/
 /* fatal error, print a message to standard-error output and exit.
  */
 void error(char * msg) {
@@ -105,6 +108,27 @@ double * compute_dct_coefficients(double * image, int X, int Y, int * N) {
 }
 
 /*----------------------------------------------------------------------------*/
+/* Upper-bound of log P(S_n<=s), where S_n is a Irwin-Hall random variable.
+ */
+double log_irwin_hall_pvalue(int nn, double s) {
+    double n = (double) nn;
+    double t = 0.5 * n - s;
+
+    /* the sum s is larger than the mean value, so P ~ 1 */
+    if(t < 0.0) return 0.0;
+
+    /* the first term of Irwin-Hall p-value is an upper-bound */
+    double pvalue_first_term = n * log10(s) - 0.5 * log10(2.0 * M_PI)
+                             - (n+0.5) * log10(n) + n * log10(exp(1.0));
+
+    /* Irwin-Hall p-value can be upper-bounded by Hoeffding's inequality */
+    double pvalue_hoeffding = - 2.0 * t * t / n * log10(exp(1.0));
+
+    /* return the smallest of the two upper-bounds */
+    return MIN(pvalue_first_term, pvalue_hoeffding);
+}
+
+/*----------------------------------------------------------------------------*/
 /* computes quantization NFA (in log10) for coefficient c
    and quantization value q
  */
@@ -126,12 +150,8 @@ double quantization_nfa(double * coeff, int N, int c, double q) {
         }
     }
 
-    /* NFA = NT * s^n / n! */
-    /* log(n!) is bounded by Stirling's approximation: */
-    /* n! >= sqrt(2pi) * n^(n+0.5) * exp(-n) */
-    /* then, log10(NFA) <= log10(NT) + n*log10(s) - log10(latter expansion) */
-    logNFA = logNT + n * log10(s)
-        - 0.5 * log10(2.0 * M_PI) - (n+0.5) * log10(n) + n * log10(exp(1.0));
+    /* normal approximation of Irwin-Hall law */
+    logNFA = logNT + log_irwin_hall_pvalue(n,s);
 
     return logNFA;
 }
