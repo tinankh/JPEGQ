@@ -115,7 +115,7 @@ double log_irwin_hall_pvalue(int nn, double s) {
     double t = 0.5 * n - s;
 
     /* the sum s is larger than the mean value, so P ~ 1 */
-    if(t < 0.0) return 0.0;
+    if(t <= 0.0) return 0.0;
 
     /* the first term of Irwin-Hall p-value is an upper-bound */
     double pvalue_first_term = n * log10(s) - 0.5 * log10(2.0 * M_PI)
